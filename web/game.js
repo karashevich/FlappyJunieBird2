@@ -13,6 +13,7 @@ const speedControl = document.getElementById('speedControl');
 const speedValueDisplay = document.getElementById('speedValue');
 const jumpForceControl = document.getElementById('jumpForceControl');
 const jumpForceValueDisplay = document.getElementById('jumpForceValue');
+const backgroundMusic = document.getElementById('backgroundMusic');
 
 // Scoreboard elements
 const playerTitleElement = document.getElementById('playerTitle');
@@ -490,6 +491,19 @@ function displayHighScores() {
     });
 }
 
+// Music control functions
+function playBackgroundMusic() {
+    // Play the background music
+    backgroundMusic.play().catch(error => {
+        console.log("Audio playback failed: ", error);
+    });
+}
+
+function pauseBackgroundMusic() {
+    // Pause the background music
+    backgroundMusic.pause();
+}
+
 // Game functions
 function startGame() {
     gameRunning = true;
@@ -517,6 +531,9 @@ function startGame() {
     jumpHeightDisplay.textContent = physicsController.jumpForce;
     updatePlayerTitle();
 
+    // Play background music
+    playBackgroundMusic();
+
     // Start game loop
     frames = 0;
     animate();
@@ -536,6 +553,9 @@ function gameOver() {
 
     // Play game over sound
     createGameOverSound();
+
+    // Pause background music
+    pauseBackgroundMusic();
 }
 
 // Function to draw brick background
@@ -672,6 +692,9 @@ window.onload = function() {
     if (junieLogoSprite.complete) {
         createBirdSprites();
     }
+
+    // Initialize background music
+    backgroundMusic.volume = 0.5; // Set volume to 50%
 
     // Initialize gravity control
     gravityControl.value = physicsController.gravity;
