@@ -8,6 +8,29 @@ const playerNameInput = document.getElementById('playerName');
 const saveScoreButton = document.getElementById('saveScore');
 const highScoresList = document.getElementById('highScores');
 
+// Physics controller
+const physicsController = {
+    gravity: 0.25, // Reduced gravity (was 0.5)
+    jumpForce: 8,  // Reduced jump force (was 10)
+
+    applyGravity: function(object) {
+        object.velocity += this.gravity;
+        object.y += object.velocity;
+    },
+
+    applyJump: function(object) {
+        object.velocity = -this.jumpForce;
+    },
+
+    setGravity: function(value) {
+        this.gravity = value;
+    },
+
+    setJumpForce: function(value) {
+        this.jumpForce = value;
+    }
+};
+
 // Audio context for sound effects
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -75,99 +98,37 @@ let gameRunning = false;
 let score = 0;
 let frames = 0;
 
-// Sprite animation variables
-const birdSprites = [];
-const birdSpriteFrames = 3;
-let currentBirdFrame = 0;
-let frameCounter = 0;
-
-// Create bird sprites
-function createBirdSprites() {
-    const colors = ['#FFD700', '#FFA500', '#FF8C00']; // Gold, Orange, Dark Orange
-
-    for (let i = 0; i < birdSpriteFrames; i++) {
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 30;
-        tempCanvas.height = 30;
-        const tempCtx = tempCanvas.getContext('2d');
-
-        // Draw bird body
-        tempCtx.fillStyle = colors[i];
-        tempCtx.beginPath();
-        tempCtx.ellipse(15, 15, 15, 12, 0, 0, Math.PI * 2);
-        tempCtx.fill();
-
-        // Draw wing (different position for each frame)
-        tempCtx.fillStyle = '#FFF';
-        tempCtx.beginPath();
-
-        if (i === 0) {
-            // Wing down
-            tempCtx.ellipse(10, 18, 8, 5, Math.PI / 4, 0, Math.PI * 2);
-        } else if (i === 1) {
-            // Wing middle
-            tempCtx.ellipse(10, 15, 8, 5, 0, 0, Math.PI * 2);
-        } else {
-            // Wing up
-            tempCtx.ellipse(10, 12, 8, 5, -Math.PI / 4, 0, Math.PI * 2);
-        }
-
-        tempCtx.fill();
-
-        // Draw eye
-        tempCtx.fillStyle = '#000';
-        tempCtx.beginPath();
-        tempCtx.arc(22, 12, 3, 0, Math.PI * 2);
-        tempCtx.fill();
-
-        // Draw beak
-        tempCtx.fillStyle = '#FF6347'; // Tomato color
-        tempCtx.beginPath();
-        tempCtx.moveTo(28, 15);
-        tempCtx.lineTo(35, 15);
-        tempCtx.lineTo(28, 18);
-        tempCtx.closePath();
-        tempCtx.fill();
-
-        // Store the sprite
-        const sprite = new Image();
-        sprite.src = tempCanvas.toDataURL();
-        birdSprites.push(sprite);
-    }
-}
+// Junie logo sprite
+let junieLogoSprite = new Image();
+junieLogoSprite.src = 'images/junie-logo.svg';
 
 // Bird object
 const bird = {
     x: 50,
     y: canvas.height / 2,
-    width: 30,
-    height: 30,
-    gravity: 0.5,
+    width: 40,
+    height: 40,
     velocity: 0,
-    jump: 10,
 
     draw: function() {
-        // Update animation frame
-        if (gameRunning && frames % 10 === 0) {
-            currentBirdFrame = (currentBirdFrame + 1) % birdSpriteFrames;
-        }
+        // Rotate logo based on velocity (for diving effect)
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
 
-        // Rotate bird based on velocity (for diving effect)
-        if (this.velocity > 5) {
-            ctx.save();
-            ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-            ctx.rotate(Math.min(this.velocity / 20, Math.PI / 4));
-            ctx.drawImage(birdSprites[currentBirdFrame], -this.width / 2, -this.height / 2, this.width, this.height);
-            ctx.restore();
-        } else {
-            ctx.drawImage(birdSprites[currentBirdFrame], this.x, this.y, this.width, this.height);
-        }
+        // Calculate rotation based on velocity
+        // This creates a more natural rotation that follows the gravitational arc
+        const rotationAngle = Math.atan2(this.velocity, 5);
+        ctx.rotate(rotationAngle);
+
+        // Draw the Junie logo
+        ctx.drawImage(junieLogoSprite, -this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.restore();
     },
 
     update: function() {
         if (gameRunning) {
-            this.velocity += this.gravity;
-            this.y += this.velocity;
+            // Use physics controller to apply gravity
+            physicsController.applyGravity(this);
 
             // Check if bird hits the ground
             if (this.y + this.height >= canvas.height) {
@@ -183,7 +144,8 @@ const bird = {
     },
 
     flap: function() {
-        this.velocity = -this.jump;
+        // Use physics controller to apply jump
+        physicsController.applyJump(this);
         createFlapSound();
     }
 };
@@ -443,8 +405,7 @@ saveScoreButton.addEventListener('click', function() {
 
 // Initialize game
 window.onload = function() {
-    // Create sprites
-    createBirdSprites();
+    // Create pipe sprites
     createPipeSprites();
 
     // Draw initial state
