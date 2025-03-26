@@ -16,7 +16,7 @@ body {
 }
 
 #gameCanvas {
-    background-color: #87CEEB; /* Sky blue */
+    background-color: #333333; /* Dark grey to match brick background */
     border: 2px solid #000;
     display: block;
     width: 100%;
@@ -31,6 +31,22 @@ body {
     font-weight: bold;
     color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+#controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px;
+}
+
+#gravityControl {
+    width: 100px;
+    margin-top: 5px;
 }
 
 #gameOver {

@@ -10,6 +10,16 @@
     <div class="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="score">0</div>
+        <div id="controls">
+            <label for="gravityControl">Gravity: <span id="gravityValue">0.15</span></label>
+            <input type="range" id="gravityControl" min="0.05" max="0.5" step="0.05" value="0.15">
+            <br>
+            <label for="speedControl">Speed: <span id="speedValue">1.5</span></label>
+            <input type="range" id="speedControl" min="0.5" max="3.0" step="0.1" value="1.5">
+            <br>
+            <label for="jumpForceControl">Jump Height: <span id="jumpForceValue">2.67</span></label>
+            <input type="range" id="jumpForceControl" min="1.0" max="8.0" step="0.1" value="2.67">
+        </div>
         <div id="gameOver" class="hidden">
             <h2>Game Over</h2>
             <p>Your Score: <span id="finalScore">0</span></p>
