@@ -72,12 +72,31 @@ body {
     padding-bottom: 10px;
 }
 
+.scoreboard-player {
+    margin-bottom: 15px;
+}
+
+.scoreboard-divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 15px 0;
+}
+
+.scoreboard-highscores {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.scoreboard-settings {
+    margin-top: 15px;
+}
+
 .scoreboard-item {
-    margin: 10px 0;
+    margin: 5px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 5px 0;
     border-bottom: 1px solid #eee;
 }
 
@@ -85,6 +104,34 @@ body {
     font-weight: bold;
     margin-right: 10px;
     color: #555;
+}
+
+#sideHighScores {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+#sideHighScores li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+}
+
+#sideHighScores li span.rank {
+    font-weight: bold;
+    color: #4CAF50; /* Green color */
+    margin-right: 10px;
+}
+
+#sideHighScores li span.name {
+    flex-grow: 1;
+}
+
+#sideHighScores li span.score {
+    font-weight: bold;
 }
 
 #gravityControl {

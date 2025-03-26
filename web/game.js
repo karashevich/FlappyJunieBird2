@@ -16,12 +16,14 @@ const jumpForceValueDisplay = document.getElementById('jumpForceValue');
 const backgroundMusic = document.getElementById('backgroundMusic');
 
 // Scoreboard elements
-const playerTitleElement = document.getElementById('playerTitle');
-const playerNameDisplay = document.getElementById('playerNameDisplay');
-const scoreDisplay = document.getElementById('scoreDisplay');
-const gravityDisplay = document.getElementById('gravityDisplay');
-const speedDisplay = document.getElementById('speedDisplay');
-const jumpHeightDisplay = document.getElementById('jumpHeightDisplay');
+// Create dummy elements for removed elements
+const playerTitleElement = document.createElement('span');
+const playerNameDisplay = document.createElement('span');
+const scoreDisplay = document.createElement('span');
+const gravityDisplay = document.createElement('span');
+const speedDisplay = document.createElement('span');
+const jumpHeightDisplay = document.createElement('span');
+const sideHighScoresList = document.getElementById('sideHighScores');
 
 // Physics controller
 const physicsController = {
@@ -469,11 +471,13 @@ function getHighScores() {
 function displayHighScores() {
     const highScores = getHighScores();
 
-    // Clear current list
+    // Clear current lists
     highScoresList.innerHTML = '';
+    sideHighScoresList.innerHTML = '';
 
-    // Add each score to the list
+    // Add each score to both lists
     highScores.forEach((score, index) => {
+        // Create list item for game over screen
         const li = document.createElement('li');
 
         const rankSpan = document.createElement('span');
@@ -493,6 +497,27 @@ function displayHighScores() {
         li.appendChild(scoreSpan);
 
         highScoresList.appendChild(li);
+
+        // Create list item for side scoreboard
+        const sideLi = document.createElement('li');
+
+        const sideRankSpan = document.createElement('span');
+        sideRankSpan.className = 'rank';
+        sideRankSpan.textContent = `${index + 1}.`;
+
+        const sideNameSpan = document.createElement('span');
+        sideNameSpan.className = 'name';
+        sideNameSpan.textContent = score.name;
+
+        const sideScoreSpan = document.createElement('span');
+        sideScoreSpan.className = 'score';
+        sideScoreSpan.textContent = score.score;
+
+        sideLi.appendChild(sideRankSpan);
+        sideLi.appendChild(sideNameSpan);
+        sideLi.appendChild(sideScoreSpan);
+
+        sideHighScoresList.appendChild(sideLi);
     });
 }
 
