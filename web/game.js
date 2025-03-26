@@ -146,21 +146,26 @@ const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
 // Sound effect functions
 function createFlapSound() {
+    // Create a drum hit sound instead of flapping wings
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(500, audioContext.currentTime + 0.1);
+    // Use triangle wave for more percussive sound
+    oscillator.type = 'triangle';
+    // Lower frequency for drum-like sound
+    oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.05);
 
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    // Higher initial gain for stronger attack
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    // Faster decay for drum-like sound
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
 
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
 
     oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.1);
+    oscillator.stop(audioContext.currentTime + 0.15);
 }
 
 function createScoringSound() {
