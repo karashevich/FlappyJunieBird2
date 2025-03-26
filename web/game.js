@@ -65,8 +65,8 @@ const physicsController = {
 
     // Calculate speed based on score
     calculateSpeedBasedOnScore: function(score) {
-        // Increase speed by 0.1 for every 5 points, up to a maximum of 2x the base speed
-        const speedIncrease = Math.min(Math.floor(score / 5) * 0.1, this.baseSpeed);
+        // Increase speed by 0.05 for each passed pipe, up to a maximum of 2x the base speed
+        const speedIncrease = Math.min(score * 0.05, this.baseSpeed);
         this.currentSpeed = this.baseSpeed + speedIncrease;
 
         // Update the speed display
