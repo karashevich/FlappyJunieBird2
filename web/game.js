@@ -7,11 +7,18 @@ const finalScoreElement = document.getElementById('finalScore');
 const playerNameInput = document.getElementById('playerName');
 const saveScoreButton = document.getElementById('saveScore');
 const highScoresList = document.getElementById('highScores');
+const gravityControl = document.getElementById('gravityControl');
+const gravityValueDisplay = document.getElementById('gravityValue');
+const speedControl = document.getElementById('speedControl');
+const speedValueDisplay = document.getElementById('speedValue');
+const jumpForceControl = document.getElementById('jumpForceControl');
+const jumpForceValueDisplay = document.getElementById('jumpForceValue');
 
 // Physics controller
 const physicsController = {
-    gravity: 0.25, // Reduced gravity (was 0.5)
-    jumpForce: 8,  // Reduced jump force (was 10)
+    gravity: 0.15, // Further reduced gravity (was 0.25)
+    jumpForce: 2.67,  // Reduced jump force (was 8, now 3x less)
+    speed: 1.5,    // Default speed for pipes
 
     applyGravity: function(object) {
         object.velocity += this.gravity;
@@ -24,12 +31,34 @@ const physicsController = {
 
     setGravity: function(value) {
         this.gravity = value;
+        gravityValueDisplay.textContent = value;
+    },
+
+    setSpeed: function(value) {
+        this.speed = value;
+        speedValueDisplay.textContent = value;
     },
 
     setJumpForce: function(value) {
         this.jumpForce = value;
+        jumpForceValueDisplay.textContent = value;
     }
 };
+
+// Event listener for gravity control
+gravityControl.addEventListener('input', function() {
+    physicsController.setGravity(parseFloat(this.value));
+});
+
+// Event listener for speed control
+speedControl.addEventListener('input', function() {
+    physicsController.setSpeed(parseFloat(this.value));
+});
+
+// Event listener for jump height control
+jumpForceControl.addEventListener('input', function() {
+    physicsController.setJumpForce(parseFloat(this.value));
+});
 
 // Audio context for sound effects
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -102,6 +131,60 @@ let frames = 0;
 let junieLogoSprite = new Image();
 junieLogoSprite.src = 'images/junie-logo.svg';
 
+// Bird animation sprites
+let birdSprites = [];
+let currentSpriteIndex = 0;
+let animationCounter = 0;
+const animationSpeed = 5; // Update sprite every 5 frames
+
+// Create bird animation sprites
+function createBirdSprites() {
+    // We'll create 3 sprites for the animation
+    for (let i = 0; i < 3; i++) {
+        const spriteCanvas = document.createElement('canvas');
+        spriteCanvas.width = 40;
+        spriteCanvas.height = 40;
+        const spriteCtx = spriteCanvas.getContext('2d');
+
+        // Draw the base Junie logo
+        spriteCtx.drawImage(junieLogoSprite, 0, 0, 40, 40);
+
+        // Add wing animation
+        spriteCtx.fillStyle = '#FFD700'; // Gold color for wings
+
+        if (i === 0) {
+            // Wings up position
+            spriteCtx.beginPath();
+            spriteCtx.moveTo(5, 20);
+            spriteCtx.lineTo(15, 5);
+            spriteCtx.lineTo(25, 15);
+            spriteCtx.closePath();
+            spriteCtx.fill();
+        } else if (i === 1) {
+            // Wings middle position
+            spriteCtx.beginPath();
+            spriteCtx.moveTo(5, 20);
+            spriteCtx.lineTo(20, 15);
+            spriteCtx.lineTo(25, 20);
+            spriteCtx.closePath();
+            spriteCtx.fill();
+        } else {
+            // Wings down position
+            spriteCtx.beginPath();
+            spriteCtx.moveTo(5, 20);
+            spriteCtx.lineTo(15, 30);
+            spriteCtx.lineTo(25, 25);
+            spriteCtx.closePath();
+            spriteCtx.fill();
+        }
+
+        // Create image from canvas
+        const sprite = new Image();
+        sprite.src = spriteCanvas.toDataURL();
+        birdSprites.push(sprite);
+    }
+}
+
 // Bird object
 const bird = {
     x: 50,
@@ -120,8 +203,14 @@ const bird = {
         const rotationAngle = Math.atan2(this.velocity, 5);
         ctx.rotate(rotationAngle);
 
-        // Draw the Junie logo
-        ctx.drawImage(junieLogoSprite, -this.width / 2, -this.height / 2, this.width, this.height);
+        // Draw the current sprite from the animation
+        if (birdSprites.length > 0) {
+            ctx.drawImage(birdSprites[currentSpriteIndex], -this.width / 2, -this.height / 2, this.width, this.height);
+        } else {
+            // Fallback to the static logo if sprites aren't loaded yet
+            ctx.drawImage(junieLogoSprite, -this.width / 2, -this.height / 2, this.width, this.height);
+        }
+
         ctx.restore();
     },
 
@@ -139,6 +228,15 @@ const bird = {
             if (this.y <= 0) {
                 this.y = 0;
                 this.velocity = 0;
+            }
+
+            // Update animation
+            if (birdSprites.length > 0) {
+                animationCounter++;
+                if (animationCounter >= animationSpeed) {
+                    animationCounter = 0;
+                    currentSpriteIndex = (currentSpriteIndex + 1) % birdSprites.length;
+                }
             }
         }
     },
@@ -216,7 +314,7 @@ function createPipeSprites() {
 function Pipe() {
     this.x = canvas.width;
     this.width = 60;
-    this.gap = 150;
+    this.gap = 300; // Doubled the gap (was 150)
     this.topHeight = Math.floor(Math.random() * (canvas.height - this.gap - 100)) + 50;
     this.bottomY = this.topHeight + this.gap;
 
@@ -230,7 +328,7 @@ function Pipe() {
 
     this.update = function() {
         if (gameRunning) {
-            this.x -= 2; // Move pipes to the left
+            this.x -= physicsController.speed; // Using speed from physicsController
 
             // Check collision with bird
             if (
@@ -345,9 +443,51 @@ function gameOver() {
     createGameOverSound();
 }
 
+// Function to draw brick background
+function drawBrickBackground() {
+    const brickWidth = 40;
+    const brickHeight = 20;
+    const rows = Math.ceil(canvas.height / brickHeight);
+    const cols = Math.ceil(canvas.width / brickWidth);
+
+    // Set background to dark grey
+    ctx.fillStyle = '#333333';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            // Alternate between black and dark grey bricks
+            ctx.fillStyle = (row + col) % 2 === 0 ? '#000000' : '#444444';
+
+            // Add offset to every other row for brick pattern
+            const offsetX = row % 2 === 0 ? 0 : brickWidth / 2;
+
+            ctx.fillRect(
+                col * brickWidth + offsetX, 
+                row * brickHeight, 
+                brickWidth, 
+                brickHeight
+            );
+
+            // Draw mortar lines
+            ctx.strokeStyle = '#555555';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(
+                col * brickWidth + offsetX, 
+                row * brickHeight, 
+                brickWidth, 
+                brickHeight
+            );
+        }
+    }
+}
+
 function animate() {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw brick background
+    drawBrickBackground();
 
     // Update and draw bird
     bird.update();
@@ -408,11 +548,34 @@ window.onload = function() {
     // Create pipe sprites
     createPipeSprites();
 
+    // Wait for the Junie logo to load before creating bird sprites
+    junieLogoSprite.onload = function() {
+        createBirdSprites();
+    };
+
+    // If the image is already loaded (from cache), create sprites immediately
+    if (junieLogoSprite.complete) {
+        createBirdSprites();
+    }
+
+    // Initialize gravity control
+    gravityControl.value = physicsController.gravity;
+    gravityValueDisplay.textContent = physicsController.gravity;
+
+    // Initialize speed control
+    speedControl.value = physicsController.speed;
+    speedValueDisplay.textContent = physicsController.speed;
+
+    // Initialize jump height control
+    jumpForceControl.value = physicsController.jumpForce;
+    jumpForceValueDisplay.textContent = physicsController.jumpForce;
+
     // Draw initial state
+    drawBrickBackground();
     bird.draw();
 
     // Show instructions
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = 'white';
     ctx.font = '20px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('Press SPACE to start', canvas.width / 2, canvas.height / 2);
