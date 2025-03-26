@@ -135,5 +135,5 @@ This document outlines the steps required for an AI agent in an IDE to create a 
 
 - [x] Add sound effects.
 - [x] Add animated sprites.
-- [ ] Implement a leaderboard.
+- [x] Implement a leaderboard.
 - [ ] Make the background dynamic.
