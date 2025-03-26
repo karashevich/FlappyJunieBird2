@@ -142,3 +142,4 @@ This document outlines the steps required for an AI agent in an IDE to create a 
 - [x] Reduce a height of a jump (3x time less).
 - [x] Add a controller same to gravity and speed for a jump height.
 - [x] Make possible to add the result to the scoreboard even if it already full. Store the players with top 5 results.
+- [x] Make the speed faster when the score is getting higher.

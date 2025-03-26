@@ -27,6 +27,8 @@ const physicsController = {
     gravity: 0.15, // Further reduced gravity (was 0.25)
     jumpForce: 2.67,  // Reduced jump force (was 8, now 3x less)
     speed: 1.5,    // Default speed for pipes
+    baseSpeed: 1.5, // Store the base speed set by the slider
+    currentSpeed: 1.5, // Current speed (may be increased based on score)
 
     applyGravity: function(object) {
         object.velocity += this.gravity;
@@ -46,6 +48,8 @@ const physicsController = {
 
     setSpeed: function(value) {
         this.speed = value;
+        this.baseSpeed = value; // Store the base speed
+        this.currentSpeed = value; // Reset current speed to base speed
         speedValueDisplay.textContent = value;
         speedDisplay.textContent = value;
         updatePlayerTitle();
@@ -56,6 +60,18 @@ const physicsController = {
         jumpForceValueDisplay.textContent = value;
         jumpHeightDisplay.textContent = value;
         updatePlayerTitle();
+    },
+
+    // Calculate speed based on score
+    calculateSpeedBasedOnScore: function(score) {
+        // Increase speed by 0.1 for every 5 points, up to a maximum of 2x the base speed
+        const speedIncrease = Math.min(Math.floor(score / 5) * 0.1, this.baseSpeed);
+        this.currentSpeed = this.baseSpeed + speedIncrease;
+
+        // Update the speed display
+        speedDisplay.textContent = this.currentSpeed.toFixed(1);
+
+        return this.currentSpeed;
     }
 };
 
@@ -74,10 +90,10 @@ function updatePlayerTitle() {
     }
 
     // Determine title based on speed
-    if (physicsController.speed > 2.5) {
+    if (physicsController.currentSpeed > 2.5) {
         title = "Speed Demon";
         emoji = "🔥";
-    } else if (physicsController.speed < 1.0) {
+    } else if (physicsController.currentSpeed < 1.0) {
         title = "Lazy Bird";
         emoji = "🐢";
     }
@@ -93,10 +109,10 @@ function updatePlayerTitle() {
 
     // If no specific title was set, use a default based on overall settings
     if (title === "") {
-        if (physicsController.gravity < 0.2 && physicsController.speed > 2.0 && physicsController.jumpForce > 4.0) {
+        if (physicsController.gravity < 0.2 && physicsController.currentSpeed > 2.0 && physicsController.jumpForce > 4.0) {
             title = "Pro Flapper";
             emoji = "🏆";
-        } else if (physicsController.gravity > 0.25 && physicsController.speed < 1.5 && physicsController.jumpForce < 2.0) {
+        } else if (physicsController.gravity > 0.25 && physicsController.currentSpeed < 1.5 && physicsController.jumpForce < 2.0) {
             title = "Beginner Bird";
             emoji = "🐣";
         } else {
@@ -392,7 +408,8 @@ function Pipe() {
 
     this.update = function() {
         if (gameRunning) {
-            this.x -= physicsController.speed; // Using speed from physicsController
+            // Use the current speed which may be increased based on score
+            this.x -= physicsController.currentSpeed;
 
             // Check collision with bird
             if (
@@ -410,6 +427,9 @@ function Pipe() {
                 scoreDisplay.textContent = score;
                 this.passed = true;
                 createScoringSound();
+
+                // Calculate new speed based on updated score
+                physicsController.calculateSpeedBasedOnScore(score);
             }
         }
     };
@@ -488,9 +508,12 @@ function startGame() {
     // Reset player name input
     playerNameInput.value = '';
 
+    // Reset speed to base speed
+    physicsController.currentSpeed = physicsController.baseSpeed;
+
     // Update scoreboard values
     gravityDisplay.textContent = physicsController.gravity;
-    speedDisplay.textContent = physicsController.speed;
+    speedDisplay.textContent = physicsController.currentSpeed;
     jumpHeightDisplay.textContent = physicsController.jumpForce;
     updatePlayerTitle();
 
@@ -659,6 +682,7 @@ window.onload = function() {
     speedControl.value = physicsController.speed;
     speedValueDisplay.textContent = physicsController.speed;
     speedDisplay.textContent = physicsController.speed;
+    physicsController.currentSpeed = physicsController.speed; // Initialize currentSpeed
 
     // Initialize jump height control
     jumpForceControl.value = physicsController.jumpForce;
