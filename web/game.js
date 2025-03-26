@@ -3,6 +3,10 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 const gameOverElement = document.getElementById('gameOver');
+const finalScoreElement = document.getElementById('finalScore');
+const playerNameInput = document.getElementById('playerName');
+const saveScoreButton = document.getElementById('saveScore');
+const highScoresList = document.getElementById('highScores');
 
 // Audio context for sound effects
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -286,6 +290,61 @@ function Pipe() {
     };
 }
 
+// Leaderboard functions
+function saveHighScore(name, score) {
+    const highScores = getHighScores();
+
+    // Add new score
+    highScores.push({ name, score });
+
+    // Sort scores (highest first)
+    highScores.sort((a, b) => b.score - a.score);
+
+    // Keep only top 10
+    highScores.splice(10);
+
+    // Save to localStorage
+    localStorage.setItem('flappyHighScores', JSON.stringify(highScores));
+
+    // Update display
+    displayHighScores();
+}
+
+function getHighScores() {
+    const highScores = localStorage.getItem('flappyHighScores');
+    return highScores ? JSON.parse(highScores) : [];
+}
+
+function displayHighScores() {
+    const highScores = getHighScores();
+
+    // Clear current list
+    highScoresList.innerHTML = '';
+
+    // Add each score to the list
+    highScores.forEach((score, index) => {
+        const li = document.createElement('li');
+
+        const rankSpan = document.createElement('span');
+        rankSpan.className = 'rank';
+        rankSpan.textContent = `${index + 1}.`;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'name';
+        nameSpan.textContent = score.name;
+
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'score';
+        scoreSpan.textContent = score.score;
+
+        li.appendChild(rankSpan);
+        li.appendChild(nameSpan);
+        li.appendChild(scoreSpan);
+
+        highScoresList.appendChild(li);
+    });
+}
+
 // Game functions
 function startGame() {
     gameRunning = true;
@@ -300,6 +359,9 @@ function startGame() {
     // Clear pipes
     pipes.length = 0;
 
+    // Reset player name input
+    playerNameInput.value = '';
+
     // Start game loop
     frames = 0;
     animate();
@@ -307,7 +369,17 @@ function startGame() {
 
 function gameOver() {
     gameRunning = false;
+
+    // Update final score
+    finalScoreElement.textContent = score;
+
+    // Display game over screen with leaderboard
     gameOverElement.classList.remove('hidden');
+
+    // Display high scores
+    displayHighScores();
+
+    // Play game over sound
     createGameOverSound();
 }
 
@@ -357,6 +429,18 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+// Event listeners for leaderboard
+saveScoreButton.addEventListener('click', function() {
+    const name = playerNameInput.value.trim();
+    if (name) {
+        saveHighScore(name, score);
+        playerNameInput.value = '';
+
+        // Hide input after saving
+        document.getElementById('nameInput').style.display = 'none';
+    }
+});
+
 // Initialize game
 window.onload = function() {
     // Create sprites
@@ -371,4 +455,7 @@ window.onload = function() {
     ctx.font = '20px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('Press SPACE to start', canvas.width / 2, canvas.height / 2);
+
+    // Load high scores
+    displayHighScores();
 };

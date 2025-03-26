@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Junie Bird</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="score">0</div>
+        <div id="gameOver" class="hidden">
+            <h2>Game Over</h2>
+            <p>Your Score: <span id="finalScore">0</span></p>
+            <div id="nameInput" class="leaderboard-input">
+                <input type="text" id="playerName" placeholder="Enter your name" maxlength="10">
+                <button id="saveScore">Save Score</button>
+            </div>
+            <div id="leaderboard">
+                <h3>Leaderboard</h3>
+                <ul id="highScores"></ul>
+            </div>
+            <p>Press Space to Restart</p>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
