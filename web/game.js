@@ -425,8 +425,8 @@ function saveHighScore(name, score) {
     // Sort scores (highest first)
     highScores.sort((a, b) => b.score - a.score);
 
-    // Keep only top 10
-    highScores.splice(10);
+    // Keep only top 5
+    highScores.splice(5);
 
     // Save to localStorage
     localStorage.setItem('flappyHighScores', JSON.stringify(highScores));
