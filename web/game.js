@@ -14,6 +14,14 @@ const speedValueDisplay = document.getElementById('speedValue');
 const jumpForceControl = document.getElementById('jumpForceControl');
 const jumpForceValueDisplay = document.getElementById('jumpForceValue');
 
+// Scoreboard elements
+const playerTitleElement = document.getElementById('playerTitle');
+const playerNameDisplay = document.getElementById('playerNameDisplay');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const gravityDisplay = document.getElementById('gravityDisplay');
+const speedDisplay = document.getElementById('speedDisplay');
+const jumpHeightDisplay = document.getElementById('jumpHeightDisplay');
+
 // Physics controller
 const physicsController = {
     gravity: 0.15, // Further reduced gravity (was 0.25)
@@ -32,18 +40,74 @@ const physicsController = {
     setGravity: function(value) {
         this.gravity = value;
         gravityValueDisplay.textContent = value;
+        gravityDisplay.textContent = value;
+        updatePlayerTitle();
     },
 
     setSpeed: function(value) {
         this.speed = value;
         speedValueDisplay.textContent = value;
+        speedDisplay.textContent = value;
+        updatePlayerTitle();
     },
 
     setJumpForce: function(value) {
         this.jumpForce = value;
         jumpForceValueDisplay.textContent = value;
+        jumpHeightDisplay.textContent = value;
+        updatePlayerTitle();
     }
 };
+
+// Function to update player title based on physics settings
+function updatePlayerTitle() {
+    let title = "";
+    let emoji = "";
+
+    // Determine title based on gravity
+    if (physicsController.gravity < 0.1) {
+        title = "Space Bird";
+        emoji = "🌌";
+    } else if (physicsController.gravity > 0.3) {
+        title = "Heavy Flapper";
+        emoji = "🪨";
+    }
+
+    // Determine title based on speed
+    if (physicsController.speed > 2.5) {
+        title = "Speed Demon";
+        emoji = "🔥";
+    } else if (physicsController.speed < 1.0) {
+        title = "Lazy Bird";
+        emoji = "🐢";
+    }
+
+    // Determine title based on jump height
+    if (physicsController.jumpForce > 6.0) {
+        title = "Super Jumper";
+        emoji = "🦘";
+    } else if (physicsController.jumpForce < 1.5) {
+        title = "Tiny Hopper";
+        emoji = "🐜";
+    }
+
+    // If no specific title was set, use a default based on overall settings
+    if (title === "") {
+        if (physicsController.gravity < 0.2 && physicsController.speed > 2.0 && physicsController.jumpForce > 4.0) {
+            title = "Pro Flapper";
+            emoji = "🏆";
+        } else if (physicsController.gravity > 0.25 && physicsController.speed < 1.5 && physicsController.jumpForce < 2.0) {
+            title = "Beginner Bird";
+            emoji = "🐣";
+        } else {
+            title = "Balanced Flyer";
+            emoji = "✨";
+        }
+    }
+
+    // Update the title element
+    playerTitleElement.textContent = title + " " + emoji;
+}
 
 // Event listener for gravity control
 gravityControl.addEventListener('input', function() {
@@ -343,6 +407,7 @@ function Pipe() {
             if (this.x + this.width < bird.x && !this.passed) {
                 score++;
                 scoreElement.textContent = score;
+                scoreDisplay.textContent = score;
                 this.passed = true;
                 createScoringSound();
             }
@@ -410,6 +475,7 @@ function startGame() {
     gameRunning = true;
     score = 0;
     scoreElement.textContent = score;
+    scoreDisplay.textContent = score;
     gameOverElement.classList.add('hidden');
 
     // Reset bird position
@@ -421,6 +487,12 @@ function startGame() {
 
     // Reset player name input
     playerNameInput.value = '';
+
+    // Update scoreboard values
+    gravityDisplay.textContent = physicsController.gravity;
+    speedDisplay.textContent = physicsController.speed;
+    jumpHeightDisplay.textContent = physicsController.jumpForce;
+    updatePlayerTitle();
 
     // Start game loop
     frames = 0;
@@ -525,7 +597,24 @@ document.addEventListener('keydown', function(e) {
 
         if (gameRunning) {
             bird.flap();
-        } else {
+        }
+    } else if (e.code === 'Enter') {
+        e.preventDefault(); // Prevent form submission
+
+        if (!gameRunning) {
+            // If there's a name in the input field, save it before starting a new game
+            const name = playerNameInput.value.trim();
+            if (name) {
+                saveHighScore(name, score);
+                playerNameInput.value = '';
+
+                // Update player name in scoreboard for next game
+                playerNameDisplay.textContent = name;
+
+                // Hide input after saving
+                document.getElementById('nameInput').style.display = 'none';
+            }
+
             startGame();
         }
     }
@@ -537,6 +626,9 @@ saveScoreButton.addEventListener('click', function() {
     if (name) {
         saveHighScore(name, score);
         playerNameInput.value = '';
+
+        // Update player name in scoreboard for next game
+        playerNameDisplay.textContent = name;
 
         // Hide input after saving
         document.getElementById('nameInput').style.display = 'none';
@@ -561,14 +653,27 @@ window.onload = function() {
     // Initialize gravity control
     gravityControl.value = physicsController.gravity;
     gravityValueDisplay.textContent = physicsController.gravity;
+    gravityDisplay.textContent = physicsController.gravity;
 
     // Initialize speed control
     speedControl.value = physicsController.speed;
     speedValueDisplay.textContent = physicsController.speed;
+    speedDisplay.textContent = physicsController.speed;
 
     // Initialize jump height control
     jumpForceControl.value = physicsController.jumpForce;
     jumpForceValueDisplay.textContent = physicsController.jumpForce;
+    jumpHeightDisplay.textContent = physicsController.jumpForce;
+
+    // Initialize player title
+    updatePlayerTitle();
+
+    // Try to get player name from localStorage
+    const highScores = getHighScores();
+    if (highScores.length > 0) {
+        // Use the name of the last player who saved a score
+        playerNameDisplay.textContent = highScores[0].name;
+    }
 
     // Draw initial state
     drawBrickBackground();
@@ -578,7 +683,7 @@ window.onload = function() {
     ctx.fillStyle = 'white';
     ctx.font = '20px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('Press SPACE to start', canvas.width / 2, canvas.height / 2);
+    ctx.fillText('Press ENTER to start', canvas.width / 2, canvas.height / 2);
 
     // Load high scores
     displayHighScores();

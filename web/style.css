@@ -9,6 +9,12 @@ body {
     font-family: Arial, sans-serif;
 }
 
+.game-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
 .game-container {
     position: relative;
     width: 400px;
@@ -42,6 +48,43 @@ body {
     border-radius: 5px;
     color: white;
     font-size: 14px;
+}
+
+.scoreboard {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    color: #333;
+    font-size: 14px;
+    width: 250px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 50px;
+    border: 1px solid #ddd;
+}
+
+.scoreboard-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
+    color: #4CAF50; /* Green color */
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.scoreboard-item {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.scoreboard-item .label {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #555;
 }
 
 #gravityControl {

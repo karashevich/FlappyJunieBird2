@@ -7,31 +7,58 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <div id="score">0</div>
-        <div id="controls">
-            <label for="gravityControl">Gravity: <span id="gravityValue">0.15</span></label>
-            <input type="range" id="gravityControl" min="0.05" max="0.5" step="0.05" value="0.15">
-            <br>
-            <label for="speedControl">Speed: <span id="speedValue">1.5</span></label>
-            <input type="range" id="speedControl" min="0.5" max="3.0" step="0.1" value="1.5">
-            <br>
-            <label for="jumpForceControl">Jump Height: <span id="jumpForceValue">2.67</span></label>
-            <input type="range" id="jumpForceControl" min="1.0" max="8.0" step="0.1" value="2.67">
+    <div class="game-layout">
+        <div class="game-container">
+            <canvas id="gameCanvas"></canvas>
+            <div id="score">0</div>
+            <div id="controls">
+                <label for="gravityControl">Gravity: <span id="gravityValue">0.15</span></label>
+                <input type="range" id="gravityControl" min="0.05" max="0.5" step="0.05" value="0.15">
+                <br>
+                <label for="speedControl">Speed: <span id="speedValue">1.5</span></label>
+                <input type="range" id="speedControl" min="0.5" max="3.0" step="0.1" value="1.5">
+                <br>
+                <label for="jumpForceControl">Jump Height: <span id="jumpForceValue">2.67</span></label>
+                <input type="range" id="jumpForceControl" min="1.0" max="8.0" step="0.1" value="2.67">
+            </div>
+            <div id="gameOver" class="hidden">
+                <h2>Game Over</h2>
+                <p>Your Score: <span id="finalScore">0</span></p>
+                <div id="nameInput" class="leaderboard-input">
+                    <input type="text" id="playerName" placeholder="Enter your name" maxlength="10">
+                    <button id="saveScore">Save Score</button>
+                </div>
+                <div id="leaderboard">
+                    <h3>Leaderboard</h3>
+                    <ul id="highScores"></ul>
+                </div>
+                <p>Press Enter to Restart</p>
+            </div>
         </div>
-        <div id="gameOver" class="hidden">
-            <h2>Game Over</h2>
-            <p>Your Score: <span id="finalScore">0</span></p>
-            <div id="nameInput" class="leaderboard-input">
-                <input type="text" id="playerName" placeholder="Enter your name" maxlength="10">
-                <button id="saveScore">Save Score</button>
+        <div id="gameScoreboard" class="scoreboard">
+            <div class="scoreboard-title">
+                <span id="playerTitle">Flappy Junie</span> 🏆
             </div>
-            <div id="leaderboard">
-                <h3>Leaderboard</h3>
-                <ul id="highScores"></ul>
+            <div class="scoreboard-item">
+                <span class="label">Name:</span>
+                <span id="playerNameDisplay">Player</span>
             </div>
-            <p>Press Space to Restart</p>
+            <div class="scoreboard-item">
+                <span class="label">Score:</span>
+                <span id="scoreDisplay">0</span>
+            </div>
+            <div class="scoreboard-item">
+                <span class="label">Gravity:</span>
+                <span id="gravityDisplay">0.15</span> 🪨
+            </div>
+            <div class="scoreboard-item">
+                <span class="label">Speed:</span>
+                <span id="speedDisplay">1.5</span> 🚀
+            </div>
+            <div class="scoreboard-item">
+                <span class="label">Jump Height:</span>
+                <span id="jumpHeightDisplay">2.67</span> 🦘
+            </div>
         </div>
     </div>
     <script src="game.js"></script>

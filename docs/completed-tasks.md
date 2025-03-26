@@ -64,7 +64,7 @@ This document outlines the steps required for an AI agent in an IDE to create a 
 
 #### 3.2.6 Game Over State
 - [x] Display a game-over message when the player loses.
-- [x] Allow the player to restart by pressing the spacebar.
+- [x] Allow the player to restart by pressing the Enter key.
 
 ## 4. Implementation Plan
 
