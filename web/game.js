@@ -71,6 +71,67 @@ let gameRunning = false;
 let score = 0;
 let frames = 0;
 
+// Sprite animation variables
+const birdSprites = [];
+const birdSpriteFrames = 3;
+let currentBirdFrame = 0;
+let frameCounter = 0;
+
+// Create bird sprites
+function createBirdSprites() {
+    const colors = ['#FFD700', '#FFA500', '#FF8C00']; // Gold, Orange, Dark Orange
+
+    for (let i = 0; i < birdSpriteFrames; i++) {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 30;
+        tempCanvas.height = 30;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        // Draw bird body
+        tempCtx.fillStyle = colors[i];
+        tempCtx.beginPath();
+        tempCtx.ellipse(15, 15, 15, 12, 0, 0, Math.PI * 2);
+        tempCtx.fill();
+
+        // Draw wing (different position for each frame)
+        tempCtx.fillStyle = '#FFF';
+        tempCtx.beginPath();
+
+        if (i === 0) {
+            // Wing down
+            tempCtx.ellipse(10, 18, 8, 5, Math.PI / 4, 0, Math.PI * 2);
+        } else if (i === 1) {
+            // Wing middle
+            tempCtx.ellipse(10, 15, 8, 5, 0, 0, Math.PI * 2);
+        } else {
+            // Wing up
+            tempCtx.ellipse(10, 12, 8, 5, -Math.PI / 4, 0, Math.PI * 2);
+        }
+
+        tempCtx.fill();
+
+        // Draw eye
+        tempCtx.fillStyle = '#000';
+        tempCtx.beginPath();
+        tempCtx.arc(22, 12, 3, 0, Math.PI * 2);
+        tempCtx.fill();
+
+        // Draw beak
+        tempCtx.fillStyle = '#FF6347'; // Tomato color
+        tempCtx.beginPath();
+        tempCtx.moveTo(28, 15);
+        tempCtx.lineTo(35, 15);
+        tempCtx.lineTo(28, 18);
+        tempCtx.closePath();
+        tempCtx.fill();
+
+        // Store the sprite
+        const sprite = new Image();
+        sprite.src = tempCanvas.toDataURL();
+        birdSprites.push(sprite);
+    }
+}
+
 // Bird object
 const bird = {
     x: 50,
@@ -82,8 +143,21 @@ const bird = {
     jump: 10,
 
     draw: function() {
-        ctx.fillStyle = '#FFD700'; // Gold color for the bird
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        // Update animation frame
+        if (gameRunning && frames % 10 === 0) {
+            currentBirdFrame = (currentBirdFrame + 1) % birdSpriteFrames;
+        }
+
+        // Rotate bird based on velocity (for diving effect)
+        if (this.velocity > 5) {
+            ctx.save();
+            ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+            ctx.rotate(Math.min(this.velocity / 20, Math.PI / 4));
+            ctx.drawImage(birdSprites[currentBirdFrame], -this.width / 2, -this.height / 2, this.width, this.height);
+            ctx.restore();
+        } else {
+            ctx.drawImage(birdSprites[currentBirdFrame], this.x, this.y, this.width, this.height);
+        }
     },
 
     update: function() {
@@ -113,6 +187,65 @@ const bird = {
 // Pipes array
 const pipes = [];
 
+// Pipe sprites
+let pipeTopSprite;
+let pipeBottomSprite;
+
+// Create pipe sprites
+function createPipeSprites() {
+    // Create top pipe sprite
+    const topCanvas = document.createElement('canvas');
+    topCanvas.width = 60;
+    topCanvas.height = 400; // Max height
+    const topCtx = topCanvas.getContext('2d');
+
+    // Draw pipe body
+    const gradient = topCtx.createLinearGradient(0, 0, 60, 0);
+    gradient.addColorStop(0, '#006400'); // Dark green
+    gradient.addColorStop(0.5, '#008000'); // Green
+    gradient.addColorStop(1, '#006400'); // Dark green
+
+    topCtx.fillStyle = gradient;
+    topCtx.fillRect(0, 0, 60, 400);
+
+    // Draw pipe border
+    topCtx.strokeStyle = '#003300';
+    topCtx.lineWidth = 2;
+    topCtx.strokeRect(0, 0, 60, 400);
+
+    // Draw pipe cap
+    topCtx.fillStyle = '#008000';
+    topCtx.fillRect(-5, 395, 70, 20);
+    topCtx.strokeRect(-5, 395, 70, 20);
+
+    // Create bottom pipe sprite (similar to top but flipped)
+    const bottomCanvas = document.createElement('canvas');
+    bottomCanvas.width = 60;
+    bottomCanvas.height = 400;
+    const bottomCtx = bottomCanvas.getContext('2d');
+
+    // Draw pipe body
+    bottomCtx.fillStyle = gradient;
+    bottomCtx.fillRect(0, 0, 60, 400);
+
+    // Draw pipe border
+    bottomCtx.strokeStyle = '#003300';
+    bottomCtx.lineWidth = 2;
+    bottomCtx.strokeRect(0, 0, 60, 400);
+
+    // Draw pipe cap
+    bottomCtx.fillStyle = '#008000';
+    bottomCtx.fillRect(-5, -15, 70, 20);
+    bottomCtx.strokeRect(-5, -15, 70, 20);
+
+    // Store sprites
+    pipeTopSprite = new Image();
+    pipeTopSprite.src = topCanvas.toDataURL();
+
+    pipeBottomSprite = new Image();
+    pipeBottomSprite.src = bottomCanvas.toDataURL();
+}
+
 // Pipe object constructor
 function Pipe() {
     this.x = canvas.width;
@@ -122,12 +255,11 @@ function Pipe() {
     this.bottomY = this.topHeight + this.gap;
 
     this.draw = function() {
-        // Draw top pipe
-        ctx.fillStyle = '#008000'; // Green color for pipes
-        ctx.fillRect(this.x, 0, this.width, this.topHeight);
+        // Draw top pipe (upside down)
+        ctx.drawImage(pipeTopSprite, 0, pipeTopSprite.height - this.topHeight, this.width, this.topHeight, this.x, 0, this.width, this.topHeight);
 
         // Draw bottom pipe
-        ctx.fillRect(this.x, this.bottomY, this.width, canvas.height - this.bottomY);
+        ctx.drawImage(pipeBottomSprite, 0, 0, this.width, canvas.height - this.bottomY, this.x, this.bottomY, this.width, canvas.height - this.bottomY);
     };
 
     this.update = function() {
@@ -227,6 +359,10 @@ document.addEventListener('keydown', function(e) {
 
 // Initialize game
 window.onload = function() {
+    // Create sprites
+    createBirdSprites();
+    createPipeSprites();
+
     // Draw initial state
     bird.draw();
 
